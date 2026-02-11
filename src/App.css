@@ -1,42 +1,345 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+   #root {
+    margin: 0;
+    padding: 0;
   }
-  to {
-    transform: rotate(360deg);
+  
+  /* ---- Scene ---- */
+  .scene {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 2s ease-in;
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  
+  .scene--visible {
+    opacity: 1;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+  
+  /* ---- Ambient Golden Glow ---- */
+  .ambient-glow {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(100px);
+  }
+  
+  .ambient-glow--left {
+    width: 300px;
+    height: 500px;
+    left: calc(50% - 280px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: radial-gradient(ellipse, rgba(218, 165, 32, 0.15), transparent);
+  }
+  
+  .ambient-glow--right {
+    width: 300px;
+    height: 500px;
+    right: calc(50% - 280px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: radial-gradient(ellipse, rgba(218, 165, 32, 0.15), transparent);
+  }
+  
+  .ambient-glow--center {
+    width: 200px;
+    height: 600px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse, rgba(255, 215, 0, 0.06), transparent);
+  }
+  
+  /* ---- Lamp Image Container ---- */
+  .lamp-image-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .lamp-image {
+    height: 70vh;
+    max-height: 600px;
+    min-height: 300px;
+    width: auto;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+    filter: drop-shadow(0 0 20px rgba(218, 165, 32, 0.15));
+  }
+  
+  /* ---- Wick Point (flame anchor) ---- */
+  .wick-point {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+  }
+  
+  /* ---- Flame ---- */
+  .flame {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 26px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+  }
+  
+  .flame--lit {
+    opacity: 1;
+  }
+  
+  /* Outer flame body */
+  .flame::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      ellipse at 50% 85%,
+      #FFF8DC 0%,
+      #FFD700 25%,
+      #FFA500 50%,
+      #FF6347 75%,
+      rgba(255, 69, 0, 0) 100%
+    );
+    border-radius: 50% 50% 50% 50% / 60% 60% 35% 35%;
+    filter: blur(0.5px);
+    animation: flame-flicker 0.3s infinite alternate ease-in-out;
+  }
+  
+  /* Inner bright core */
+  .flame::after {
+    content: "";
+    position: absolute;
+    bottom: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35%;
+    height: 45%;
+    background: radial-gradient(
+      ellipse at 50% 85%,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 235, 150, 0.7)
+    );
+    border-radius: 50% 50% 50% 50% / 60% 60% 35% 35%;
+    animation: flame-core 0.2s infinite alternate ease-in-out;
+  }
+  
+  /* Warm glow around each lit flame */
+  .flame__glow {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 165, 0, 0.25) 0%,
+      rgba(255, 140, 0, 0.1) 40%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    margin-bottom: -15px;
+  }
+  
+  @keyframes flame-flicker {
+    0%   { transform: scaleX(1) scaleY(1) translateX(0); }
+    25%  { transform: scaleX(0.92) scaleY(1.06) translateX(-0.3px); }
+    50%  { transform: scaleX(1.04) scaleY(0.95) translateX(0.3px); }
+    75%  { transform: scaleX(0.96) scaleY(1.03) translateX(-0.2px); }
+    100% { transform: scaleX(1.02) scaleY(0.97) translateX(0.2px); }
+  }
+  
+  @keyframes flame-core {
+    0%   { opacity: 0.8; transform: translateX(-50%) scaleY(1); }
+    100% { opacity: 1; transform: translateX(-50%) scaleY(1.1); }
+  }
+  
+  /* ---- Matchstick ---- */
+  .match {
+    position: absolute;
+    top: -4px;
+    height: 2.5px;
+    width: 120px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  /* Wooden stick body */
+  .match::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #5C3317, #8B5A2B 40%, #A0522D 70%, #8B5A2B);
+    border-radius: 1px;
+  }
+  
+  /* Phosphorus match head */
+  .match::after {
+    content: "";
+    position: absolute;
+    top: -3px;
+    width: 6px;
+    height: 9px;
+    background: radial-gradient(ellipse at 50% 60%, #FF6347, #DC143C 60%, #8B0000);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: 0 0 6px 2px rgba(255, 100, 0, 0.4);
+  }
+  
+  /* Burning tip glow */
+  .match--entering::after {
+    animation: match-tip-burn 0.4s infinite alternate;
+  }
+  
+  @keyframes match-tip-burn {
+    from { box-shadow: 0 0 4px 1px rgba(255, 100, 0, 0.3); }
+    to   { box-shadow: 0 0 10px 4px rgba(255, 100, 0, 0.6); }
+  }
+  
+  /* Left matchstick — tip on right */
+  .match--left {
+    right: 10px;
+  }
+  
+  .match--left::after {
+    right: -2px;
+  }
+  
+  .match--left.match--entering {
+    animation: match-enter-left 1.3s ease-out forwards;
+  }
+  
+  .match--left.match--exiting {
+    animation: match-exit-left 0.8s ease-in forwards;
+  }
+  
+  /* Right matchstick — tip on left */
+  .match--right {
+    left: 10px;
+  }
+  
+  .match--right::after {
+    left: -2px;
+  }
+  
+  .match--right.match--entering {
+    animation: match-enter-right 1.3s ease-out forwards;
+  }
+  
+  .match--right.match--exiting {
+    animation: match-exit-right 0.8s ease-in forwards;
+  }
+  
+  @keyframes match-enter-left {
+    0%   { transform: translateX(-400px); opacity: 0; }
+    8%   { opacity: 1; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes match-enter-right {
+    0%   { transform: translateX(400px); opacity: 0; }
+    8%   { opacity: 1; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes match-exit-left {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(-150px); }
+  }
+  
+  @keyframes match-exit-right {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(150px); }
+  }
+  
+  /* ---- Ignite Button ---- */
+  .ignite-btn {
+    padding: 14px 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #FFD700;
+    background: linear-gradient(135deg, rgba(218, 165, 32, 0.15), rgba(139, 90, 43, 0.3));
+    border: 1.5px solid rgba(218, 165, 32, 0.5);
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+  
+  .ignite-btn:hover {
+    background: linear-gradient(135deg, rgba(218, 165, 32, 0.3), rgba(139, 90, 43, 0.5));
+    box-shadow: 0 0 30px rgba(255, 165, 0, 0.3);
+    transform: scale(1.05);
+  }
+  
+  /* ---- Rose Petals ---- */
+  .petals {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    overflow: hidden;
+  }
+  
+  .petal {
+    position: absolute;
+    top: -30px;
+    background: radial-gradient(
+      ellipse at 35% 30%,
+      #E8333C,
+      #DC143C 40%,
+      #B22222 70%,
+      #8B0000
+    );
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    opacity: 0;
+    animation-name: petal-fall;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: both;
+    animation-iteration-count: infinite;
+    box-shadow: inset -1px 1px 3px rgba(0, 0, 0, 0.25);
+  }
+  
+  @keyframes petal-fall {
+    0% {
+      transform: translateY(-20px) translateX(0) rotate(var(--petal-rotation, 0deg));
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.9;
+    }
+    80% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(110vh) translateX(var(--petal-drift, 50px))
+                 rotate(calc(var(--petal-rotation, 0deg) + 540deg));
+      opacity: 0;
+    }
+  }
+  
+  /* ---- Responsive ---- */
+  @media (max-height: 500px) {
+    .lamp-image {
+      height: 50vh;
+    }
+  }
+  
