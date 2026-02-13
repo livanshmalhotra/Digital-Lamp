@@ -1,98 +1,72 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import lampImage from "@/assets/kerala-lamp.png";
 
 const WICK_COUNT = 5;
 
 const Index = () => {
-  const [started, setStarted] = useState(false);
-  const [fadeIn, setFadeIn] = useState(false);
   const [litWicks, setLitWicks] = useState<boolean[]>(
     Array(WICK_COUNT).fill(false)
   );
+
   const [activeMatch, setActiveMatch] = useState<{
     side: "left" | "right";
     wickIndex: number;
   } | null>(null);
+
   const [matchPhase, setMatchPhase] = useState<"entering" | "exiting">(
     "entering"
   );
+
   const [showPetals, setShowPetals] = useState(false);
 
   const petals = useMemo(
     () =>
-      Array.from({ length: 15 }, () => ({
+      Array.from({ length: 40 }, () => ({
         left: `${5 + Math.random() * 90}%`,
-        delay: `${Math.random() * 3}s`,
+        delay: `${Math.random() * 2}s`,
         duration: `${4 + Math.random() * 3}s`,
-        size: 8 + Math.random() * 12,
-        drift: `${-80 + Math.random() * 160}px`,
+        size: 10 + Math.random() * 18,
+        drift: `${-120 + Math.random() * 240}px`,
         initialRotation: Math.random() * 360,
       })),
     []
   );
+  
 
-  const handleIgnite = () => {
-    setStarted(true);
-    setFadeIn(false);
-    setLitWicks(Array(WICK_COUNT).fill(false));
-    setActiveMatch(null);
-    setShowPetals(false);
-    setTimeout(() => setFadeIn(true), 300);
+  // 🔥 Ignite single wick
+  const igniteWick = (index: number) => {
+    if (litWicks[index]) return;
+
+    const side: "left" | "right" = index % 2 === 0 ? "left" : "right";
+
+    setMatchPhase("entering");
+    setActiveMatch({ side, wickIndex: index });
+
+    setTimeout(() => {
+      setLitWicks((prev) => {
+        const next = [...prev];
+        next[index] = true;
+        return next;
+      });
+    }, 800);
+
+    setTimeout(() => {
+      setMatchPhase("exiting");
+    }, 1200);
+
+    setTimeout(() => {
+      setActiveMatch(null);
+    }, 1800);
   };
 
+  // 🌹 Show petals after all 5 are lit
   useEffect(() => {
-    if (!started) return;
-
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
-
-    const MATCH_ENTER = 1300;
-    const LIGHT_AFTER = 200;
-    const MATCH_LINGER = 400;
-    const MATCH_EXIT = 800;
-    const GAP = 400;
-
-    let delay = 1000;
-
-    for (let i = 0; i < WICK_COUNT; i++) {
-      const side: "left" | "right" = i % 2 === 0 ? "left" : "right";
-      const d = delay;
-
-      timeouts.push(
-        setTimeout(() => {
-          setMatchPhase("entering");
-          setActiveMatch({ side, wickIndex: i });
-        }, d)
-      );
-
-      timeouts.push(
-        setTimeout(() => {
-          setLitWicks((prev) => {
-            const next = [...prev];
-            next[i] = true;
-            return next;
-          });
-        }, d + MATCH_ENTER + LIGHT_AFTER)
-      );
-
-      timeouts.push(
-        setTimeout(() => {
-          setMatchPhase("exiting");
-        }, d + MATCH_ENTER + LIGHT_AFTER + MATCH_LINGER)
-      );
-
-      timeouts.push(
-        setTimeout(() => {
-          setActiveMatch(null);
-        }, d + MATCH_ENTER + LIGHT_AFTER + MATCH_LINGER + MATCH_EXIT)
-      );
-
-      delay += MATCH_ENTER + LIGHT_AFTER + MATCH_LINGER + MATCH_EXIT + GAP;
+    if (litWicks.every(Boolean)) {
+      setTimeout(() => {
+        setShowPetals(true);
+      }, 800);
     }
-
-    timeouts.push(setTimeout(() => setShowPetals(true), delay));
-
-    return () => timeouts.forEach(clearTimeout);
-  }, [started]);
+  }, [litWicks]);
 
   const wickPositions = [
     { top: "72%" },
@@ -102,36 +76,42 @@ const Index = () => {
     { top: "18%" },
   ];
 
-  if (!started) {
-    return (
-      <div className="scene scene--visible" style={{ flexDirection: "column", gap: "30px" }}>
-        <img
-          src={lampImage}
-          alt="Kerala lamp"
-          style={{ height: "40vh", opacity: 0.6, filter: "drop-shadow(0 0 20px rgba(218,165,32,0.2))" }}
-          draggable={false}
-        />
-        <button className="ignite-btn" onClick={handleIgnite}>
-          🔥 Ignite
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className={`scene ${fadeIn ? "scene--visible" : ""}`}>
-      <div className="ambient-glow ambient-glow--left" />
-      <div className="ambient-glow ambient-glow--right" />
-      <div className="ambient-glow ambient-glow--center" />
-
-      <div className="lamp-image-container">
+    <div
+      className="scene scene--visible"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "20px 10px",
+      }}
+    >
+      {/* 🪔 CENTER LAMP */}
+      <div
+        className="lamp-image-container"
+        style={{
+          position: "relative",
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+        }}
+      >
         <img
           src={lampImage}
           alt="Kerala traditional brass lamp"
           className="lamp-image"
           draggable={false}
+          style={{
+            maxHeight: "85vh",
+            maxWidth: "90vw",
+            objectFit: "contain",
+          }}
         />
-
+  
         {wickPositions.map((pos, i) => (
           <div key={i} className="wick-point" style={{ top: pos.top }}>
             <div className={`flame ${litWicks[i] ? "flame--lit" : ""}`} />
@@ -144,7 +124,38 @@ const Index = () => {
           </div>
         ))}
       </div>
-
+  
+      {/* 🔘 BOTTOM BUTTONS */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "10px",
+          width: "100%",
+          paddingBottom: "10px",
+        }}
+      >
+        {Array.from({ length: WICK_COUNT }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => igniteWick(i)}
+            disabled={litWicks[i]}
+            style={{
+              fontSize: "12px",
+              padding: "6px 10px",
+              borderRadius: "6px",
+              background: litWicks[i] ? "#444" : "#d4af37",
+              color: "white",
+              border: "none",
+              cursor: litWicks[i] ? "default" : "pointer",
+            }}
+          >
+            🔥 {i + 1}
+          </button>
+        ))}
+      </div>
+  
+      {/* 🌹 PETALS */}
       {showPetals && (
         <div className="petals">
           {petals.map((p, i) => (
@@ -168,6 +179,7 @@ const Index = () => {
       )}
     </div>
   );
+  
 };
 
 export default Index;
