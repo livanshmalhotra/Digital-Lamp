@@ -68,19 +68,16 @@ const Index = () => {
     }
   }, [litWicks]);
 
-  const wickPositions = [
-    { top: "72%" },
-    { top: "58%" },
-    { top: "44%" },
-    { top: "30%" },
-    { top: "18%" },
-  ];
+  const wickPositions = Array.from({ length: WICK_COUNT }, (_, i) => ({
+    top: `${72 - i * 14}%`,
+  }));
+  
 
   return (
     <div
       className="scene scene--visible"
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
@@ -106,8 +103,9 @@ const Index = () => {
           className="lamp-image"
           draggable={false}
           style={{
-            maxHeight: "85vh",
-            maxWidth: "90vw",
+            width: "100%",
+            maxWidth: "380px",   // prevents oversized scaling
+            height: "auto",
             objectFit: "contain",
           }}
         />
@@ -133,6 +131,7 @@ const Index = () => {
           gap: "10px",
           width: "100%",
           paddingBottom: "10px",
+          touchAction: "manipulation",
         }}
       >
         {Array.from({ length: WICK_COUNT }).map((_, i) => (
