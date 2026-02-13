@@ -137,21 +137,23 @@ const Index = () => {
       >
         {Array.from({ length: WICK_COUNT }).map((_, i) => (
           <button
-            key={i}
-            onClick={() => igniteWick(i)}
-            disabled={litWicks[i]}
-            style={{
-              fontSize: "12px",
-              padding: "6px 10px",
-              borderRadius: "6px",
-              background: litWicks[i] ? "#444" : "#d4af37",
-              color: "white",
-              border: "none",
-              cursor: litWicks[i] ? "default" : "pointer",
-            }}
-          >
-            🔥 {i + 1}
-          </button>
+          key={i}
+          onClick={() => igniteWick(i)}
+          disabled={litWicks[i]}
+          style={{
+            fontSize: "12px",
+            padding: "6px 10px",
+            borderRadius: "6px",
+            background: litWicks[i] ? "#444" : "#d4af37",
+            color: "white",
+            border: "none",
+            cursor: litWicks[i] ? "not-allowed" : "pointer",
+            opacity: litWicks[i] ? 0.7 : 1,
+          }}
+        >
+          {litWicks[i] ? " Lit" : `🔥 Ignite ${i + 1}`}
+        </button>
+        
         ))}
       </div>
   
